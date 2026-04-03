@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable> <AssemblyName>XONT.VENTURA.SOMNT24.DAL</AssemblyName>
+    <RootNamespace>XONT.VENTURA.SOMNT24</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\XONT.VENTURA.SOMNT24.DOMAIN\XONT.VENTURA.SOMNT24.DOMAIN.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="XONT.Common.Data.DBCommon">
+      <HintPath>..\XONT.VENTURA.SOMNT24.WEB\DLL\XONT.Common.Data.DBCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Common.Data.DBConnection">
+      <HintPath>..\XONT.VENTURA.SOMNT24.WEB\DLL\XONT.Common.Data.DBConnection.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Common.Data.DBService">
+      <HintPath>..\XONT.VENTURA.SOMNT24.WEB\DLL\XONT.Common.Data.DBService.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Common.Data.Resource">
+      <HintPath>..\XONT.VENTURA.SOMNT24.WEB\DLL\XONT.Common.Data.Resource.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Common.Message.MessageCreate">
+      <HintPath>..\XONT.VENTURA.SOMNT24.WEB\DLL\XONT.Common.Message.MessageCreate.dll</HintPath>
+    </Reference>
+    
+    <Reference Include="XONT.VENTURA.V2TRN01.BLL">
+      <HintPath>..\XONT.VENTURA.SOMNT24.WEB\DLL\XONT.VENTURA.V2TRN01.BLL.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.VENTURA.V2TRN01.DAL">
+      <HintPath>..\XONT.VENTURA.SOMNT24.WEB\DLL\XONT.VENTURA.V2TRN01.DAL.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.VENTURA.V2TRN01.DOMAIN">
+      <HintPath>..\XONT.VENTURA.SOMNT24.WEB\DLL\XONT.VENTURA.V2TRN01.DOMAIN.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

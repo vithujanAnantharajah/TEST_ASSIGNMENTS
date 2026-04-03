@@ -1,0 +1,10 @@
+/Users/vithujananantharajah/Documents/Sensze Technologies/Sensze/TEST_ASSIGNMENTS/XONT.VENTURA.SOMNT24/XONT.VENTURA.SOMNT24.DOMAIN/bin/Debug/net8.0/XONT.VENTURA.SOMNT24.DOMAIN.deps.json
+/Users/vithujananantharajah/Documents/Sensze Technologies/Sensze/TEST_ASSIGNMENTS/XONT.VENTURA.SOMNT24/XONT.VENTURA.SOMNT24.DOMAIN/bin/Debug/net8.0/XONT.VENTURA.SOMNT24.DOMAIN.dll
+/Users/vithujananantharajah/Documents/Sensze Technologies/Sensze/TEST_ASSIGNMENTS/XONT.VENTURA.SOMNT24/XONT.VENTURA.SOMNT24.DOMAIN/bin/Debug/net8.0/XONT.VENTURA.SOMNT24.DOMAIN.pdb
+/Users/vithujananantharajah/Documents/Sensze Technologies/Sensze/TEST_ASSIGNMENTS/XONT.VENTURA.SOMNT24/XONT.VENTURA.SOMNT24.DOMAIN/obj/Debug/net8.0/XONT.VENTURA.SOMNT24.DOMAIN.GeneratedMSBuildEditorConfig.editorconfig
+/Users/vithujananantharajah/Documents/Sensze Technologies/Sensze/TEST_ASSIGNMENTS/XONT.VENTURA.SOMNT24/XONT.VENTURA.SOMNT24.DOMAIN/obj/Debug/net8.0/XONT.VENTURA.SOMNT24.DOMAIN.csproj.CoreCompileInputs.cache
+/Users/vithujananantharajah/Documents/Sensze Technologies/Sensze/TEST_ASSIGNMENTS/XONT.VENTURA.SOMNT24/XONT.VENTURA.SOMNT24.DOMAIN/obj/Debug/net8.0/XONT.VENTURA.SOMNT24.DOMAIN.sourcelink.json
+/Users/vithujananantharajah/Documents/Sensze Technologies/Sensze/TEST_ASSIGNMENTS/XONT.VENTURA.SOMNT24/XONT.VENTURA.SOMNT24.DOMAIN/obj/Debug/net8.0/XONT.VENTURA.SOMNT24.DOMAIN.dll
+/Users/vithujananantharajah/Documents/Sensze Technologies/Sensze/TEST_ASSIGNMENTS/XONT.VENTURA.SOMNT24/XONT.VENTURA.SOMNT24.DOMAIN/obj/Debug/net8.0/refint/XONT.VENTURA.SOMNT24.DOMAIN.dll
+/Users/vithujananantharajah/Documents/Sensze Technologies/Sensze/TEST_ASSIGNMENTS/XONT.VENTURA.SOMNT24/XONT.VENTURA.SOMNT24.DOMAIN/obj/Debug/net8.0/XONT.VENTURA.SOMNT24.DOMAIN.pdb
+/Users/vithujananantharajah/Documents/Sensze Technologies/Sensze/TEST_ASSIGNMENTS/XONT.VENTURA.SOMNT24/XONT.VENTURA.SOMNT24.DOMAIN/obj/Debug/net8.0/ref/XONT.VENTURA.SOMNT24.DOMAIN.dll

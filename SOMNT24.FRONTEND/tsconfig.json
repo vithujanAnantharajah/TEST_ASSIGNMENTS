@@ -1,0 +1,52 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "outDir": "./dist/out-tsc",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "declaration": false,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "lib": ["ES2022", "dom"],
+    "baseUrl": "./",
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "xont-ventura-message-prompt": ["node_modules/xont-ventura-message-prompt"],
+      "xont-ventura-single-prompt": ["node_modules/xont-ventura-single-prompt"],
+      "xont-ventura-multiple-prompt": ["node_modules/xont-ventura-multiple-prompt"],
+      "xont-ventura-datepicker": ["node_modules/xont-ventura-datepicker"],
+      "xont-ventura-validators": ["node_modules/xont-ventura-validators"],
+      "xont-ventura-gridexport": ["node_modules/xont-ventura-gridexport"],
+      "xont-ventura-classification-selector": ["node_modules/xont-ventura-classification-selector"],
+      "xont-ventura-collapsible": ["node_modules/xont-ventura-collapsible"],
+      "xont-ventura-gridloader": ["node_modules/xont-ventura-gridloader"],
+      "xont-ventura-list-prompt": ["node_modules/xont-ventura-list-prompt"],
+      "angular2-datatable": ["node_modules/angular2-datatable/index.d.ts"],
+      "angular2-busy": ["node_modules/angular2-busy/index.d.ts"],
+      "rxjs/Rx": ["node_modules/rxjs/dist/bundles/rxjs.umd.js"],
+      "rxjs/*": ["node_modules/rxjs/*"]
+    }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  },
+  "files": [
+    "src/main.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts"
+  ]
+}

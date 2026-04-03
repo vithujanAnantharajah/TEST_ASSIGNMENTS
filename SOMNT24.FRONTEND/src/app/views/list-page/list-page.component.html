@@ -1,0 +1,101 @@
+<xont-ventura-message-prompt #msgPrompt />
+
+<xont-ventura-collapsible id="collapseID" targetElementID="selectionCriteriaID" collapsedText="Selection Criteria"
+    expandedText="Hide" [collapsed]="selectionCriteria.Collapsed"
+    (onChange)="selectionCriteria.Collapsed = !selectionCriteria.Collapsed">
+</xont-ventura-collapsible>
+
+<div id="selectionCriteriaID" class="selection-box card-shadow" [class.collapse]="selectionCriteria.Collapsed">
+    <div class="flex-row">
+        <div class="form-group">
+            <label for="txtReturnType" class="Captionstyle">Return Type</label>
+            <input [(ngModel)]="selectionCriteria.RetnType" type="text" id="txtReturnType" class="Textboxstyle"
+                maxlength="2" #txtReturnt="ngModel" pattern="^[a-zA-Z0-9_\-]+$" placeholder="Code">
+        </div>
+
+        <div class="form-group flex-grow">
+            <label for="txtDescription" class="Captionstyle">Description</label>
+            <input [(ngModel)]="selectionCriteria.Description" type="text" id="txtDescription"
+                class="Textboxstyle full-width" maxlength="40" #txtDesc="ngModel"
+                placeholder="Enter description search...">
+        </div>
+
+        <div class="error-container">
+            <span *ngIf="txtReturnt.errors?.['pattern'] || txtDesc.errors?.['pattern']"
+                class="Errormessagetextstyle">Invalid entry detected</span>
+        </div>
+    </div>
+
+    <div class="flex-row mt-10">
+        <div class="form-group full-width">
+            <label class="Captionstyle">Module Code</label>
+            <xont-ventura-list-prompt name="lpmtModule" #lpmtModule [maxLengths]="[4,50]" [inputWidths]="[120,405]"
+                [gridHeaders]="['Module Code','Description']" [gridFields]="['Module Code','Description']"
+                [strict]="false" (onDataBind)="lpmtModule_DataBind()" [(ngModel)]="selectionCriteria"
+                [modelProps]="['ModuleCode','ModuleCodeDesc']" [dataFields]="['Module Code','Description']">
+            </xont-ventura-list-prompt>
+        </div>
+    </div>
+
+    <div class="flex-row align-center space-between mt-10">
+        <label class="checkbox-container">
+            <input type="checkbox" [(ngModel)]="selectionCriteria.Status">
+            <span class="Captionstyle highlight-blue">Active Only</span>
+        </label>
+
+        <button type="button" [disabled]="txtReturnt.invalid || txtDesc.invalid" (click)="list(true)"
+            class="MainButtonStyle btn-primary">
+            Search Records
+        </button>
+    </div>
+</div>
+
+<hr class="divider" />
+
+<div class="grid-header-actions">
+    <xont-ventura-gridexport id="export1" gridId="tblReturn" [gridName]="'Return Type'"></xont-ventura-gridexport>
+</div>
+
+<div class="no-data-alert" *ngIf="returnType().length === 0">
+    <span class="Labelstyle">No records found matching your criteria.</span>
+</div>
+<div class="DataTableContainer glass-effect" *ngIf="returnType().length > 0">
+    <table id="tblReturn" class="DataTableStyle HeaderFreezeStyle">
+        <thead>
+            <tr>
+                <th style="width:20%">Return Type</th>
+                <th style="width:40%">Description</th>
+                <th style="width:20%">Module Code</th>
+                <th style="width:20%" class="text-center">Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of returnType(); trackBy: trackByReturnType"
+                [class.InactiveGridRowStyle]="item.Status === '0'">
+                <td><strong>{{ item.ReturnType }}</strong></td>
+                <td>{{ item.Description }}</td>
+                <td><span class="badge">{{ item.ModuleCode }}</span></td>
+                <td class="text-center">
+                    <button class="btn-link" (click)="btnNewBased_onClick(item)">Clone</button>
+                    <span class="sep">|</span>
+                    <button class="btn-link" (click)="btnEdit_onClick(item)">Edit</button>
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4">
+                    <div class="footer-container">
+                        <!-- <mfBootstrapPaginator></mfBootstrapPaginator> -->
+                        <xont-ventura-gridloader #gridLoader (onChange)="gridLoader_OnChange()" />
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<div class="action-bar mt-20">
+    <button (click)="newClick()" class="MainButtonStyle btn-success">Create New</button>
+    <button (click)="closeTab()" class="MainButtonStyle btn-outline">Exit Module</button>
+</div>

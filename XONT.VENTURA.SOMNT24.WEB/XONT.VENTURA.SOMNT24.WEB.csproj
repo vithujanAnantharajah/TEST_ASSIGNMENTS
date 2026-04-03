@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RuntimeIdentifier Condition="'$(OS)' != 'Windows_NT'">osx-arm64</RuntimeIdentifier>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\XONT.VENTURA.SOMNT24.BLL\XONT.VENTURA.SOMNT24.BLL.csproj" />
+    <ProjectReference Include="..\XONT.VENTURA.SOMNT24.DOMAIN\XONT.VENTURA.SOMNT24.DOMAIN.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="XONT.Common.Data.DBCommon">
+      <HintPath>DLL/XONT.Common.Data.DBCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Common.Data.DBConnection">
+      <HintPath>DLL/XONT.Common.Data.DBConnection.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Common.Data.DBService">
+      <HintPath>DLL/XONT.Common.Data.DBService.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Common.Data.Resource">
+      <HintPath>DLL/XONT.Common.Data.Resource.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Common.Message.MessageCreate">
+      <HintPath>DLL/XONT.Common.Message.MessageCreate.dll</HintPath>
+    </Reference>
+    
+    <Reference Include="XONT.Ventura.AppConsole.BLL">
+      <HintPath>DLL/XONT.Ventura.AppConsole.BLL.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Ventura.AppConsole.Domain">
+      <HintPath>DLL/XONT.Ventura.AppConsole.Domain.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Ventura.Common.ConvertDateTime">
+      <HintPath>DLL/XONT.Ventura.Common.ConvertDateTime.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.VENTURA.V2UTL01.BLL">
+      <HintPath>DLL/XONT.VENTURA.V2UTL01.BLL.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.VENTURA.V2UTL01.DOMAIN">
+      <HintPath>DLL/XONT.VENTURA.V2UTL01.DOMAIN.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.VENTURA.V2UTL01.DOMAIN">
+      <HintPath>DLL/XONT.VENTURA.V2UTL01.DOMAIN.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
