@@ -1,101 +1,231 @@
-<xont-ventura-message-prompt #msgPrompt />
-
-<xont-ventura-collapsible id="collapseID" targetElementID="selectionCriteriaID" collapsedText="Selection Criteria"
-    expandedText="Hide" [collapsed]="selectionCriteria.Collapsed"
-    (onChange)="selectionCriteria.Collapsed = !selectionCriteria.Collapsed">
-</xont-ventura-collapsible>
-
-<div id="selectionCriteriaID" class="selection-box card-shadow" [class.collapse]="selectionCriteria.Collapsed">
-    <div class="flex-row">
-        <div class="form-group">
-            <label for="txtReturnType" class="Captionstyle">Return Type</label>
-            <input [(ngModel)]="selectionCriteria.RetnType" type="text" id="txtReturnType" class="Textboxstyle"
-                maxlength="2" #txtReturnt="ngModel" pattern="^[a-zA-Z0-9_\-]+$" placeholder="Code">
+<div class="somnt24-dashboard">
+    <header class="main-header">
+        <div class="header-left">
+            <h1>Return Type Management</h1>
+            <p>Configure and manage system return categories</p>
         </div>
-
-        <div class="form-group flex-grow">
-            <label for="txtDescription" class="Captionstyle">Description</label>
-            <input [(ngModel)]="selectionCriteria.Description" type="text" id="txtDescription"
-                class="Textboxstyle full-width" maxlength="40" #txtDesc="ngModel"
-                placeholder="Enter description search...">
+        <div class="header-right">
+            <button class="btn btn-outline">Export</button>
+            <button class="btn btn-primary" (click)="onNew()">+ New Return Type</button>
         </div>
+    </header>
 
-        <div class="error-container">
-            <span *ngIf="txtReturnt.errors?.['pattern'] || txtDesc.errors?.['pattern']"
-                class="Errormessagetextstyle">Invalid entry detected</span>
+    <section class="filter-section">
+        <div class="filter-grid">
+            <div class="field">
+                <label>Return Type</label>
+                <input type="text" [value]="retnTypeSearch()" (input)="retnTypeSearch.set($any($event.target).value)"
+                    placeholder="Search Code...">
+            </div>
+
+            <div class="field">
+                <label>Description</label>
+                <input type="text" [value]="descSearch()" (input)="descSearch.set($any($event.target).value)"
+                    placeholder="Search Description...">
+            </div>
+
+            <div class="field">
+                <label>Module Code</label>
+                <input type="text" [value]="moduleSearch()" (input)="moduleSearch.set($any($event.target).value)"
+                    placeholder="e.g. RD, PU...">
+            </div>
+
+            <div class="field-status">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="activeOnly" [checked]="isActiveOnly()"
+                        (change)="isActiveOnly.set($any($event.target).checked)"> <label for="activeOnly">Active
+                        Only</label>
+                </div>
+            </div>
+
+            <div class="field-actions">
+                <button class="btn-clear" (click)="resetFilters()">Clear</button>
+                <button class="btn-search" (click)="loadData()" [disabled]="isLoading()">
+                    @if (isLoading()) { <span>...</span> } @else { Search }
+                </button>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <div class="flex-row mt-10">
-        <div class="form-group full-width">
-            <label class="Captionstyle">Module Code</label>
-            <xont-ventura-list-prompt name="lpmtModule" #lpmtModule [maxLengths]="[4,50]" [inputWidths]="[120,405]"
-                [gridHeaders]="['Module Code','Description']" [gridFields]="['Module Code','Description']"
-                [strict]="false" (onDataBind)="lpmtModule_DataBind()" [(ngModel)]="selectionCriteria"
-                [modelProps]="['ModuleCode','ModuleCodeDesc']" [dataFields]="['Module Code','Description']">
-            </xont-ventura-list-prompt>
-        </div>
-    </div>
+    <div class="table-container">
+        <table class="modern-table">
+            <thead>
+                <tr>
+                    <th>Return Type</th>
+                    <th>Description</th>
+                    <th>Module</th>
+                    <th>Status</th>
+                    <th class="text-right">Options</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (item of returnTypes(); track item.rowNumber) {
+                <tr>
+                    <td class="code-text">{{ item.returnType }}</td>
+                    <td>{{ item.description }}</td>
+                    <td>
+                        <span class="badge" [class.badge-info]="item.moduleCode === 'RD'"
+                            [class.badge-warning]="item.moduleCode === 'PU'">
+                            {{ item.moduleCode }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-indicator" [class.status-active]="item.status === '1'"></span>
+                        {{ item.status === '1' ? 'Active' : 'Inactive' }}
+                    </td>
+                    <td class="text-right actions">
+                        <a href="javascript:void(0)" (click)="onEdit(item)" class="edit-link">Edit</a>
+                        <a href="javascript:void(0)" (click)="onNewBasedOn(item)" class="dup-link">Duplicate</a>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="5" class="text-center p-4">No data found in XONT system.</td>
+                </tr>
+                }
+            </tbody>
+        </table>
 
-    <div class="flex-row align-center space-between mt-10">
-        <label class="checkbox-container">
-            <input type="checkbox" [(ngModel)]="selectionCriteria.Status">
-            <span class="Captionstyle highlight-blue">Active Only</span>
-        </label>
+        <footer class="table-pagination">
+            <span>
+                Showing <b>{{ (currentPage() - 1) * pageSize() + 1 }}</b>
+                to <b>{{ Math.min(currentPage() * pageSize(), totalRecords()) }}</b>
+                of <b>{{ totalRecords() }}</b> entries
+            </span>
 
-        <button type="button" [disabled]="txtReturnt.invalid || txtDesc.invalid" (click)="list(true)"
-            class="MainButtonStyle btn-primary">
-            Search Records
-        </button>
+            <div class="page-controls">
+                <button [disabled]="currentPage() === 1" (click)="loadData(currentPage() - 1)">
+                    &laquo;
+                </button>
+
+                @for (page of pageArray; track page) {
+                <button [class.active]="page === currentPage()" (click)="loadData(page)">
+                    {{ page }}
+                </button>
+                }
+
+                <button [disabled]="currentPage() === totalPages()" (click)="loadData(currentPage() + 1)">
+                    &raquo;
+                </button>
+            </div>
+        </footer>
     </div>
 </div>
 
-<hr class="divider" />
+@if (selectedItem()) {
+<div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+            <h2>{{ selectedItem()?.isNew ? 'Create New' : 'Edit' }} Return Type</h2>
+            <button class="close-btn" (click)="closeModal()">×</button>
+        </header>
 
-<div class="grid-header-actions">
-    <xont-ventura-gridexport id="export1" gridId="tblReturn" [gridName]="'Return Type'"></xont-ventura-gridexport>
-</div>
+        <div class="modal-body">
+            <div class="form-grid">
+                <div class="field">
+                    <label>Return Type <span class="mandatory">*</span></label>
+                    <input type="text" 
+                           [(ngModel)]="selectedItem()!.returnType" 
+                           [disabled]="!selectedItem()?.isNew" 
+                           [class.disabled-input]="!selectedItem()?.isNew"
+                           maxlength="2"
+                           placeholder="XX">
+                </div>
+                
+                <div class="field">
+                    <label>Module <span class="mandatory">*</span></label>
+                    <div class="custom-dropdown">
+                        <div class="dropdown-trigger" (click)="isEditModuleOpen.set(!isEditModuleOpen())">
+                            <span class="selected-val">{{ selectedItem()?.moduleCode || 'Select Module' }}</span>
+                            <span class="arrow">▼</span>
+                        </div>
 
-<div class="no-data-alert" *ngIf="returnType().length === 0">
-    <span class="Labelstyle">No records found matching your criteria.</span>
-</div>
-<div class="DataTableContainer glass-effect" *ngIf="returnType().length > 0">
-    <table id="tblReturn" class="DataTableStyle HeaderFreezeStyle">
-        <thead>
-            <tr>
-                <th style="width:20%">Return Type</th>
-                <th style="width:40%">Description</th>
-                <th style="width:20%">Module Code</th>
-                <th style="width:20%" class="text-center">Options</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let item of returnType(); trackBy: trackByReturnType"
-                [class.InactiveGridRowStyle]="item.Status === '0'">
-                <td><strong>{{ item.ReturnType }}</strong></td>
-                <td>{{ item.Description }}</td>
-                <td><span class="badge">{{ item.ModuleCode }}</span></td>
-                <td class="text-center">
-                    <button class="btn-link" (click)="btnNewBased_onClick(item)">Clone</button>
-                    <span class="sep">|</span>
-                    <button class="btn-link" (click)="btnEdit_onClick(item)">Edit</button>
-                </td>
-            </tr>
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="4">
-                    <div class="footer-container">
-                        <!-- <mfBootstrapPaginator></mfBootstrapPaginator> -->
-                        <xont-ventura-gridloader #gridLoader (onChange)="gridLoader_OnChange()" />
+                        @if (isEditModuleOpen()) {
+                        <div class="dropdown-menu">
+                            <ul class="module-list">
+                                @for (m of modules(); track m['module Code']) {
+                                <li (click)="updateEditModule(m)"
+                                    [class.active]="m['module Code'] === selectedItem()?.moduleCode">
+                                    <strong>{{ m['module Code'] }}</strong> - {{ m['description'] }}
+                                </li>
+                                }
+                            </ul>
+                        </div>
+                        }
                     </div>
-                </td>
-            </tr>
-        </tfoot>
-    </table>
-</div>
+                </div>
+            </div>
 
-<div class="action-bar mt-20">
-    <button (click)="newClick()" class="MainButtonStyle btn-success">Create New</button>
-    <button (click)="closeTab()" class="MainButtonStyle btn-outline">Exit Module</button>
+            <div class="field full-width">
+                <label>Description <span class="mandatory">*</span></label>
+                <input type="text" 
+                       [(ngModel)]="selectedItem()!.description" 
+                       maxlength="50"
+                       placeholder="Enter description...">
+            </div>
+
+            <div class="field full-width">
+                <label>Return Category</label>
+                <div class="custom-dropdown">
+                    <div class="dropdown-trigger" (click)="isEdditTypeOpen.set(!isEdditTypeOpen())">
+                        <span class="selected-val">{{ selectedItem()?.returnCategory || 'Select Category' }}</span>
+                        <span class="arrow">▼</span>
+                    </div>
+
+                    @if (isEdditTypeOpen()) {
+                    <div class="dropdown-menu">
+                        <ul class="module-list">
+                            @for (cat of types(); track cat['returnCategory']) {
+                            <li (click)="updateEditCategory(cat)"
+                                [class.active]="cat['returnCategory'] === selectedItem()?.returnCategory">
+                                <strong>{{ cat['returnCategory'] }}</strong> - {{ cat['description'] }}
+                            </li>
+                            }
+                        </ul>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <fieldset class="validation-group">
+                <legend>Return Value Validation</legend>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="v" value="No" [(ngModel)]="selectedItem()!.processingRequired"> No
+                    </label>
+                    <label>
+                        <input type="radio" name="v" value="Mandatory" [(ngModel)]="selectedItem()!.processingRequired"> Mandatory
+                    </label>
+                    <label>
+                        <input type="radio" name="v" value="WithConfirmation" [(ngModel)]="selectedItem()!.processingRequired"> With Confirmation
+                    </label>
+                </div>
+            </fieldset>
+
+            <div class="toggle-grid">
+                <label class="checkbox-item">
+                    <input type="checkbox" [checked]="selectedItem()!.isSalable === '1'"
+                        (change)="selectedItem()!.isSalable = $any($event.target).checked ? '1' : '0'"> Salable Return
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" [checked]="selectedItem()!.isDeductFromSales === '1'"
+                        (change)="selectedItem()!.isDeductFromSales = $any($event.target).checked ? '1' : '0'"> Deduct From Sales
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" [checked]="selectedItem()!.status === '1'"
+                        (change)="selectedItem()!.status = $any($event.target).checked ? '1' : '0'"> Active
+                </label>
+            </div>
+        </div>
+
+        <footer class="modal-footer">
+            <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+            <button class="btn-primary" 
+                    (click)="onUpdate()" 
+                    [disabled]="isSaving() || !selectedItem()!.returnType || !selectedItem()!.description">
+                {{ isSaving() ? 'Saving...' : 'OK' }}
+            </button>
+        </footer>
+    </div>
 </div>
+}

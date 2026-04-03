@@ -1,150 +1,263 @@
-import { Component, OnInit, ViewChild, AfterViewInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { CommonService, DatetimeService } from 'xont-ventura-services';
-import { HttpErrorResponse } from '@angular/common/http';
-import { finalize } from 'rxjs/operators';
-import { XontVenturaCollapsibleModule } from 'xont-ventura-collapsible';
-import { XontVenturaGridLoaderModule } from 'xont-ventura-gridloader';
-import { XontVenturaListPromptModule } from 'xont-ventura-list-prompt';
-import { XontVenturaMessagePromptModule } from 'xont-ventura-message-prompt';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ReturnTypeService } from 'src/app/services/return-type.service';
+import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
+import { HttpParams } from '@angular/common/http';
 
 @Component({
-  selector: 'app-list',
+  selector: 'app-list-page',
   templateUrl: './list-page.component.html',
-  styleUrls: ['./list-page.component.scss']
+  styleUrl: './list-page.component.scss'
 })
-export class ListPageComponent implements AfterViewInit {
+export class ListPageComponent {
 
-  // ViewChild references with proper typing
-  @ViewChild('gridLoader') gridLoader: any;
-  @ViewChild('msgPrompt') msgPrompt: any;
-  @ViewChild('lpmtModule') lpmtModule: any;
+  Math = Math;
 
-  // State Management using modern patterns
-  public returnType = signal<any[]>([]);
-  public busy: any; // Used for ngBusy directive
+  private service = inject(ReturnTypeService);
+  returnTypes = signal<any[]>([]);
+  isLoading = signal<boolean>(false);
+  private router = inject(Router);
+  searchText = signal<string>('');
+  isActiveOnly = signal<boolean>(true);
+  retnTypeSearch = signal<string>('');
+  descSearch = signal<string>('');
+  moduleSearch = signal<string>('');
+  currentPage = signal<number>(1);
+  pageSize = signal<number>(10);
+  totalRecords = signal<number>(0);
 
-  public selectionCriteria: any = this.getDefaultSelectionCriteria();
+  totalPages = computed(() => Math.ceil(this.totalRecords() / this.pageSize()));
 
-  // Datatable configuration
-  public rowsOnPage = 10;
-  public sortBy = "ReturnType";
-  public sortOrder = "asc";
+  selectionCriteria = {
+    businessUnit: "LUCK", // Adjust based on your login data
+    moduleCode: "",
+    moduleCodeDesc: "",
+    retnType: "",
+    description: "",
+    startWith: true,
+    status: true,
+    firstRow: 1,
+    lastRow: 10
+  };
+  selectedItem = signal<any | null>(null);
+  isSaving = signal<boolean>(false);
+  isEditModuleOpen = signal(false);
+  modules = signal<any[]>([]);
+  moduleSearchTerm = signal<any>('');
+  isEdditTypeOpen = signal(false);
+  types = signal<any[]>([]);
+  typeSearchTerm = signal<any>('');
 
-  constructor(
-    private router: Router,
-    private commonService: CommonService,
-    private returnTypeService: ReturnTypeService,
-    private datetimeService: DatetimeService) {
-    this.returnTypeService.errorOccurred$.subscribe((error: HttpErrorResponse) => {
-      this.msgPrompt?.show(error, 'SOMNT24');
+  ngOnInit() {
+  }
+
+  ngAfterViewInit() {
+    this.loadData();
+  }
+
+  loadData(page: number = 1) {
+    this.isLoading.set(true);
+    this.currentPage.set(page);
+
+    const firstRow = (page - 1) * this.pageSize() + 1;
+    const lastRow = page * this.pageSize();
+
+    const payload = {
+      businessUnit: "LUCK",
+      retnType: this.retnTypeSearch(),
+      description: this.descSearch(),
+      moduleCode: this.moduleSearch(),
+      status: this.isActiveOnly() == true ? 1 : 0,
+      firstRow: firstRow,
+      lastRow: lastRow
+    };
+    // Save state before fetching
+    this.service.post<any>('SOMNT24/ListReturnTypeData', payload).subscribe({
+      next: (res) => {
+        // res.data corresponds to the data field in your .NET Core API response
+        this.returnTypes.set(res.data || []);
+        this.totalRecords.set(res.total);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Fetch failed:', err);
+        this.isLoading.set(false);
+      }
     });
   }
-  
-  ngAfterViewInit(): void {
-    this.initConfiguration();
+
+  get pageArray() {
+    return Array.from({ length: this.totalPages() }, (_, i) => i + 1);
   }
 
-  /**
-   * Initializes component state from LocalStorage
-   */
-  private initConfiguration(): void {
-    const storedCriteria = localStorage.getItem('SOMNT24_SelectionCriteria');
+  onEdit(item: any) {
+    this.isEditModuleOpen.set(false);
+    this.isEdditTypeOpen.set(false);
+    this.loadModules();
+    this.fetchSelectedType(item.moduleCode, item.returnType);
 
-    if (storedCriteria) {
-      try {
-        this.selectionCriteria = JSON.parse(storedCriteria);
-      } catch (e) {
-        console.warn('Invalid storage data, resetting criteria.');
-        localStorage.removeItem('SOMNT24_SelectionCriteria');
-      }
-    }
-
-    // Initial data load
-    this.list(true);
+    this.selectedItem.set({
+      ...item, isSalable: item.isSalable ?? '0',
+      isDeductFromSales: item.isDeductFromSales ?? '0',
+      status: item.status ?? '1'
+    });
   }
 
-  private getDefaultSelectionCriteria(): any {
-    return {
-      ModuleCode: '',
-      ModuleCodeDesc: '',
-      RetnType: '',
-      Description: '',
-      Status: true,
-      FirstRow: 0,
-      LastRow: 0,
-      Collapsed: true
-    };
+  closeModal() {
+    this.selectedItem.set(null);
   }
 
-  /**
-   * Data binding for the Module List Prompt
-   */
-  public lpmtModule_DataBind(): void {
-    this.lpmtModule.dataSourceObservable = this.returnTypeService.getModulePromptData();
-  }
-
-  /**
-   * Core logic to fetch data based on criteria
-   * @param isInit Reset pagination to page 1
-   */
-  public list(isInit: boolean): void {
-    if (!this.gridLoader) return;
-
-    this.gridLoader.init('SOMNT24');
-    this.rowsOnPage = this.gridLoader.getPageSize();
-
-    if (isInit) {
-      this.gridLoader.setCurrentPage(1);
-      this.selectionCriteria.FirstRow = 1;
-      this.selectionCriteria.LastRow = this.gridLoader.getLoadSize();
-    } else {
-      this.selectionCriteria.FirstRow = this.gridLoader.getRowStart();
-      this.selectionCriteria.LastRow = this.gridLoader.getRowEnd();
-    }
-
-    // Persist search state
-    localStorage.setItem('SOMNT24_SelectionCriteria', JSON.stringify(this.selectionCriteria));
-
-    // Execute API call
-    this.busy = this.returnTypeService.listReturnTypeData(this.selectionCriteria)
-      .pipe(finalize(() => { /* Any cleanup after load */ }))
-      .subscribe({
-        next: (response: [any[], number]) => {
-          this.returnType.set(response[0]); // Update Signal
-          this.gridLoader.setRowCount(response[1]);
-        },
-        error: (err) => this.msgPrompt.show(err, 'SOMNT24')
-      });
-  }
-
-  // --- Navigation Handlers ---
-
-  public btnNewBased_onClick(item: any): void {
+  onNewBasedOn(item: any) {
     this.router.navigate(['new/newBasedOn', item.ReturnType, item.ModuleCode]);
   }
 
-  public btnEdit_onClick(item: any): void {
-    this.router.navigate(['new/edit', item.ReturnType, item.ModuleCode]);
+  onNew() {
+    // 1. Reset dropdown states
+    this.isEditModuleOpen.set(false);
+    this.isEdditTypeOpen.set(false);
+
+    // 2. Fetch dependencies (if not already loaded)
+    this.loadModules();
+
+    // 3. Initialize a fresh object for a NEW record
+    this.selectedItem.set({
+      moduleCode: '',       // User will select from dropdown
+      returnType: '',       // User will type this
+      description: '',
+      returnCategory: '',   // New field we added
+      processingRequired: '0', // Default to "No"
+      isSalable: '1',       // Default to active/true for new items
+      isDeductFromSales: '1',
+      status: '1',
+      isNew: true           // Flag to tell onUpdate whether to POST or PUT
+    });
   }
 
-  public newClick(): void {
-    this.router.navigate(['new/new']);
+  resetFilters() {
+    // Reset all search signals
+    this.retnTypeSearch.set('');
+    this.descSearch.set('');
+    this.moduleSearch.set('');
+    this.isActiveOnly.set(true);
+
+    // Reload the grid with empty filters
+    this.loadData();
   }
 
-  public gridLoader_OnChange(): void {
-    this.list(false);
+  updateEditModule(m: any) {
+    if (this.selectedItem()) {
+      this.selectedItem()!.moduleCode = m.code;
+      this.isEditModuleOpen.set(false);
+      this.fetchSelectedType(m.code, this.selectedItem()!.returnType);
+    }
   }
 
-  public trackByReturnType(index: number, item: any): string {
-    return item?.ReturnType ?? index.toString();
+  updateEditCategory(m: any) {
+    if (this.selectedItem()) {
+      this.selectedItem()!.returnCategory = m['returnCategory'];
+      this.selectedItem()!.categoryDesc = m['description']; // If you need the desc elsewhere
+      this.isEdditTypeOpen.set(false);
+      this.isEdditTypeOpen.set(false);
+    }
   }
 
-  public closeTab(): void {
-    window.close();
+  loadModules() {
+    this.isLoading.set(true);
+
+    this.service.get<any>('SOMNT24/GetModulePromptData').subscribe({
+      next: (res) => {
+        this.modules.set(res);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Fetch failed:', err);
+        this.isLoading.set(false);
+      }
+    });
   }
+
+  fetchSelectedType(modCode: string, retType: string) {
+    this.isLoading.set(true);
+
+    // 1. Construct the parameters correctly
+    const params = new HttpParams()
+      .set('moduleCode', modCode)
+      .set('returnType', retType);
+
+    // 2. Pass the params object in the options
+    this.service.get<any>('SOMNT24/SeletedReturnType', { params }).subscribe({
+      next: (res) => {
+        // res will be the ReturnType object if found, or null
+        this.types.set(res);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Fetch failed:', err);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  filteredModules = computed(() => {
+    const term = this.moduleSearchTerm().toLowerCase();
+
+    return this.modules().filter(m => {
+      // Safely check both fields from your API response
+      const code = (m['module Code'] || '').toLowerCase();
+      const desc = (m.description || '').toLowerCase();
+
+      return code.includes(term) || desc.includes(term);
+    });
+  });
+
+  onUpdate() {
+    const item = this.selectedItem();
+    if (!item) return;
+
+    // 1. Prepare the payload (Mapping UI booleans to DB strings '1'/'0')
+    const payload = {
+      ...item,
+      // Legacy logic: Mapping checkbox booleans/strings to '1' or '0'
+      ProcessingRequired: item.isSalable === '1' ? '1' : '0',
+      Status: item.status === '1' ? '1' : '0',
+      ReturnDeductionType: item.isDeductFromSales === '1' ? '1' : '0',
+      // Radio button value logic
+      ValidateReturnValue: item.processingRequired === 'No' ? '0' :
+        item.processingRequired === 'Mandatory' ? '1' : '2'
+    };
+
+    this.isSaving.set(true);
+
+    this.insertOrUpdateRecord(payload);
+  }
+
+  private insertOrUpdateRecord(payload: any) {
+    // Matches btnOk_OnClick in your legacy code
+    this.service.post<boolean>('SOMNT24/InsertReturnType', payload).subscribe({
+      next: (success) => {
+        if (success) {
+          this.handleSuccess('Record created successfully');
+        } else {
+          console.error('Data Submission Failed');
+          this.isSaving.set(false);
+        }
+      },
+      error: (err) => this.handleError(err)
+    });
+  }
+
+
+  private handleSuccess(message: string) {
+    this.isSaving.set(false);
+    this.closeModal();
+    this.loadData(); // Refresh the grid
+    // Add a toast/notification here if you have one
+  }
+
+  private handleError(err: any) {
+    console.error('API Error:', err);
+    this.isSaving.set(false);
+    // Map to your legacy msgPrompt error display if needed
+  }
+
 }

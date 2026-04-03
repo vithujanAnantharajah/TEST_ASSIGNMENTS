@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.1.0" />
+    <PackageReference Include="Dapper" Version="2.1.72" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+  </ItemGroup>
+
+    <ItemGroup>
+    <Reference Include="XONT.Common.Data.DBCommon">
+      <HintPath>libs/XONT.Common.Data.DBCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Common.Data.DBConnection">
+      <HintPath>libs/XONT.Common.Data.DBConnection.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Common.Data.DBService">
+      <HintPath>libs/XONT.Common.Data.DBService.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Common.Data.Resource">
+      <HintPath>libs/XONT.Common.Data.Resource.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Common.Message.MessageCreate">
+      <HintPath>libs/XONT.Common.Message.MessageCreate.dll</HintPath>
+    </Reference>
+    
+    <Reference Include="XONT.Ventura.AppConsole.BLL">
+      <HintPath>libs/XONT.Ventura.AppConsole.BLL.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Ventura.AppConsole.Domain">
+      <HintPath>libs/XONT.Ventura.AppConsole.Domain.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.Ventura.Common.ConvertDateTime">
+      <HintPath>libs/XONT.Ventura.Common.ConvertDateTime.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.VENTURA.V2UTL01.BLL">
+      <HintPath>libs/XONT.VENTURA.V2UTL01.BLL.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.VENTURA.V2UTL01.DOMAIN">
+      <HintPath>libs/XONT.VENTURA.V2UTL01.DOMAIN.dll</HintPath>
+    </Reference>
+    <Reference Include="XONT.VENTURA.V2UTL01.DOMAIN">
+      <HintPath>libs/XONT.VENTURA.V2UTL01.DOMAIN.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
