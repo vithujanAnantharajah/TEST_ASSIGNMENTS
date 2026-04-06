@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ReturnTypeService } from 'src/app/services/return-type.service';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
-import { HttpParams } from '@angular/common/http';
+import { HttpHeaders, HttpParams } from '@angular/common/http';
 
 @Component({
   selector: 'app-list-page',
@@ -47,6 +47,8 @@ export class ListPageComponent {
   isEdditTypeOpen = signal(false);
   types = signal<any[]>([]);
   typeSearchTerm = signal<any>('');
+
+  constructor(private toastr: ToastrService){}
 
   ngOnInit() {
   }
@@ -94,13 +96,17 @@ export class ListPageComponent {
     this.isEditModuleOpen.set(false);
     this.isEdditTypeOpen.set(false);
     this.loadModules();
-    this.fetchSelectedType(item.moduleCode, item.returnType);
 
     this.selectedItem.set({
-      ...item, isSalable: item.isSalable ?? '0',
+      ...item,
+      isSalable: item.isSalable ?? '0',
       isDeductFromSales: item.isDeductFromSales ?? '0',
-      status: item.status ?? '1'
+      status: item.status ?? '1',
+      moduleCode: item.moduleCode,
+      returnType: item.returnType,
+      isNew: false
     });
+    this.fetchSelectedType(item.moduleCode, item.returnType);
   }
 
   closeModal() {
@@ -146,17 +152,15 @@ export class ListPageComponent {
 
   updateEditModule(m: any) {
     if (this.selectedItem()) {
-      this.selectedItem()!.moduleCode = m.code;
+      this.selectedItem()!.moduleCode = m['module Code'].trim();
       this.isEditModuleOpen.set(false);
-      this.fetchSelectedType(m.code, this.selectedItem()!.returnType);
+      this.fetchSelectedType(m['module Code'].trim(), this.selectedItem()!.returnType);
     }
   }
 
   updateEditCategory(m: any) {
     if (this.selectedItem()) {
-      this.selectedItem()!.returnCategory = m['returnCategory'];
-      this.selectedItem()!.categoryDesc = m['description']; // If you need the desc elsewhere
-      this.isEdditTypeOpen.set(false);
+      this.selectedItem()!.returnCategory = m['return Catagory'].trim();
       this.isEdditTypeOpen.set(false);
     }
   }
@@ -177,22 +181,25 @@ export class ListPageComponent {
   }
 
   fetchSelectedType(modCode: string, retType: string) {
+    if (!modCode || !retType) return;
     this.isLoading.set(true);
 
-    // 1. Construct the parameters correctly
-    const params = new HttpParams()
-      .set('moduleCode', modCode)
-      .set('returnType', retType);
-
-    // 2. Pass the params object in the options
-    this.service.get<any>('SOMNT24/SeletedReturnType', { params }).subscribe({
+    this.service.get<any>('SOMNT24/SeletedReturnType?moduleCode=' + modCode.trim() + '&returnType=' + retType.trim(), {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }).subscribe({
       next: (res) => {
-        // res will be the ReturnType object if found, or null
-        this.types.set(res);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Fetch failed:', err);
+        if (res) {
+          this.selectedItem.set({
+            ...this.selectedItem(),
+            ...res,
+            isSalable: res.processingRequired === '1' ? '1' : '0',
+            isDeductFromSales: res.returnDeductionType === '1' ? '1' : '0',
+            status: res.status === '1' ? '1' : '0',
+            processingRequired: res.validateReturnValue === '0' ? 'No' :
+              res.validateReturnValue === '1' ? 'Mandatory' : 'WithConfirmation',
+            timeStamp: res.timeStamp
+          });
+        }
         this.isLoading.set(false);
       }
     });
@@ -214,35 +221,48 @@ export class ListPageComponent {
     const item = this.selectedItem();
     if (!item) return;
 
-    // 1. Prepare the payload (Mapping UI booleans to DB strings '1'/'0')
     const payload = {
-      ...item,
-      // Legacy logic: Mapping checkbox booleans/strings to '1' or '0'
-      ProcessingRequired: item.isSalable === '1' ? '1' : '0',
-      Status: item.status === '1' ? '1' : '0',
-      ReturnDeductionType: item.isDeductFromSales === '1' ? '1' : '0',
-      // Radio button value logic
-      ValidateReturnValue: item.processingRequired === 'No' ? '0' :
-        item.processingRequired === 'Mandatory' ? '1' : '2'
+      ModuleCode: item.moduleCode,
+      ReturnType: item.returnType,
+      Description: item.description,
+      ReturnCategory: item.returnCategory,
+      SalableReturn: item.isSalable === '1',
+      Active: item.status === '1',
+      DeductFromSales: item.isDeductFromSales === '1',
+      ReturnValueValidation: item.processingRequired,
+      TimeStamp: item.timeStamp,
+      pageType: item.isNew ? 'new' : 'edit'
     };
 
     this.isSaving.set(true);
-
     this.insertOrUpdateRecord(payload);
   }
 
   private insertOrUpdateRecord(payload: any) {
-    // Matches btnOk_OnClick in your legacy code
-    this.service.post<boolean>('SOMNT24/InsertReturnType', payload).subscribe({
-      next: (success) => {
-        if (success) {
-          this.handleSuccess('Record created successfully');
+    this.isSaving.set(true);
+
+    this.service.post<any>('SOMNT24/InsertReturnType', payload).subscribe({
+      next: (res) => {
+        if (res && res.success) {
+          const action = payload.pageType === 'new' ? 'Created' : 'Updated';
+          this.handleSuccess(`Return Type ${action} successfully.`);
         } else {
-          console.error('Data Submission Failed');
-          this.isSaving.set(false);
+          this.handleError('Database update failed. Please check your inputs.');
         }
       },
-      error: (err) => this.handleError(err)
+      error: (err) => {
+        if (err.status === 409) {
+          this.handleError('This Return Type already exists for the selected Module.');
+        } else if (err.status === 401) {
+          this.handleError('Session expired. Please log in again.');
+        } else {
+          this.handleError('Server error occurred while saving.');
+        }
+        console.error('Save Error:', err);
+      },
+      complete: () => {
+        this.isSaving.set(false);
+      }
     });
   }
 
@@ -250,14 +270,21 @@ export class ListPageComponent {
   private handleSuccess(message: string) {
     this.isSaving.set(false);
     this.closeModal();
-    this.loadData(); // Refresh the grid
-    // Add a toast/notification here if you have one
+    this.loadData(); 
+    alert(message);
   }
 
   private handleError(err: any) {
-    console.error('API Error:', err);
     this.isSaving.set(false);
-    // Map to your legacy msgPrompt error display if needed
+
+    if (err.error && err.error.desc) {
+      alert(err.error.desc); 
+      return;
+    }
+
+    // Fallback for generic errors
+    const errorMessage = typeof err === 'string' ? err : 'A server error occurred.';
+    alert(errorMessage);
   }
 
 }

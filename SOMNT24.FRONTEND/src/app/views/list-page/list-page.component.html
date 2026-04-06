@@ -124,14 +124,10 @@
             <div class="form-grid">
                 <div class="field">
                     <label>Return Type <span class="mandatory">*</span></label>
-                    <input type="text" 
-                           [(ngModel)]="selectedItem()!.returnType" 
-                           [disabled]="!selectedItem()?.isNew" 
-                           [class.disabled-input]="!selectedItem()?.isNew"
-                           maxlength="2"
-                           placeholder="XX">
+                    <input type="text" [(ngModel)]="selectedItem()!.returnType" [disabled]="!selectedItem()?.isNew"
+                        [class.disabled-input]="!selectedItem()?.isNew" maxlength="2" placeholder="XX">
                 </div>
-                
+
                 <div class="field">
                     <label>Module <span class="mandatory">*</span></label>
                     <div class="custom-dropdown">
@@ -158,10 +154,8 @@
 
             <div class="field full-width">
                 <label>Description <span class="mandatory">*</span></label>
-                <input type="text" 
-                       [(ngModel)]="selectedItem()!.description" 
-                       maxlength="50"
-                       placeholder="Enter description...">
+                <input type="text" [(ngModel)]="selectedItem()!.description" maxlength="50"
+                    placeholder="Enter description...">
             </div>
 
             <div class="field full-width">
@@ -175,10 +169,10 @@
                     @if (isEdditTypeOpen()) {
                     <div class="dropdown-menu">
                         <ul class="module-list">
-                            @for (cat of types(); track cat['returnCategory']) {
+                            @for (cat of types(); track cat['return Catagory']) {
                             <li (click)="updateEditCategory(cat)"
-                                [class.active]="cat['returnCategory'] === selectedItem()?.returnCategory">
-                                <strong>{{ cat['returnCategory'] }}</strong> - {{ cat['description'] }}
+                                [class.active]="cat['return Catagory'] === selectedItem()?.returnCategory">
+                                <strong>{{ cat['return Catagory'] }}</strong> - {{ cat['description'] }}
                             </li>
                             }
                         </ul>
@@ -194,10 +188,12 @@
                         <input type="radio" name="v" value="No" [(ngModel)]="selectedItem()!.processingRequired"> No
                     </label>
                     <label>
-                        <input type="radio" name="v" value="Mandatory" [(ngModel)]="selectedItem()!.processingRequired"> Mandatory
+                        <input type="radio" name="v" value="Mandatory" [(ngModel)]="selectedItem()!.processingRequired">
+                        Mandatory
                     </label>
                     <label>
-                        <input type="radio" name="v" value="WithConfirmation" [(ngModel)]="selectedItem()!.processingRequired"> With Confirmation
+                        <input type="radio" name="v" value="WithConfirmation"
+                            [(ngModel)]="selectedItem()!.processingRequired"> With Confirmation
                     </label>
                 </div>
             </fieldset>
@@ -209,7 +205,8 @@
                 </label>
                 <label class="checkbox-item">
                     <input type="checkbox" [checked]="selectedItem()!.isDeductFromSales === '1'"
-                        (change)="selectedItem()!.isDeductFromSales = $any($event.target).checked ? '1' : '0'"> Deduct From Sales
+                        (change)="selectedItem()!.isDeductFromSales = $any($event.target).checked ? '1' : '0'"> Deduct
+                    From Sales
                 </label>
                 <label class="checkbox-item">
                     <input type="checkbox" [checked]="selectedItem()!.status === '1'"
@@ -220,9 +217,8 @@
 
         <footer class="modal-footer">
             <button class="btn-secondary" (click)="closeModal()">Cancel</button>
-            <button class="btn-primary" 
-                    (click)="onUpdate()" 
-                    [disabled]="isSaving() || !selectedItem()!.returnType || !selectedItem()!.description">
+            <button class="btn-primary" (click)="onUpdate()"
+                [disabled]="isSaving() || !selectedItem()!.returnType || !selectedItem()!.description">
                 {{ isSaving() ? 'Saving...' : 'OK' }}
             </button>
         </footer>

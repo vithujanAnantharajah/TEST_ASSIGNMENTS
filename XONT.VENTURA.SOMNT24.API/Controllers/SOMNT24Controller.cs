@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 using XONT.Common.Message;
 using XONT.VENTURA.SOMNT24;
 using XONT.VENTURA.SOMNT24.API.Interfaces; // Ensure this points to your interface
 using XONT.Ventura.AppConsole;
 using XONT.VENTURA.SOMNT24.API.Models;
-using Microsoft.AspNetCore.Authorization; // For the User object
+using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json; // For the User object
 
 namespace XONT.VENTURA.SOMNT24.API.Controllers
 {
@@ -137,6 +137,7 @@ namespace XONT.VENTURA.SOMNT24.API.Controllers
 
         private ReturnType MapToReturnType(dynamic data, string businessUnit)
         {
+            string tsString = data.TimeStamp?.ToString();
             return new ReturnType
             {
                 BusinessUnit = businessUnit,
@@ -145,7 +146,7 @@ namespace XONT.VENTURA.SOMNT24.API.Controllers
                 Description = data.Description?.ToString().Trim(),
                 ReturnCategory = data.ReturnCategory?.ToString().Trim(),
                 // Use safe parsing for the TimeStamp byte array
-                TimeStamp = data.TimeStamp != null ? JsonConvert.DeserializeObject<byte[]>(data.TimeStamp.ToString()) : null,
+                TimeStamp = !string.IsNullOrEmpty(tsString) ? Convert.FromBase64String(tsString) : null,
                 ProcessingRequired = (bool)(data.SalableReturn ?? false) ? "1" : "0",
                 Status = (bool)(data.Active ?? false) ? "1" : "0",
                 ReturnDeductionType = (bool)(data.DeductFromSales ?? false) ? "1" : "0",

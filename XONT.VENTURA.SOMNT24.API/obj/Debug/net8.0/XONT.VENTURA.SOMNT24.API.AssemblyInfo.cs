@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("XONT.VENTURA.SOMNT24.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+83062968dfdc114b08dcea3de42eb7ef520c3978")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ba298a19b241a169c697561b9b16bc02a5e289d5")]
 [assembly: System.Reflection.AssemblyProductAttribute("XONT.VENTURA.SOMNT24.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("XONT.VENTURA.SOMNT24.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
